@@ -14,19 +14,21 @@ class fpmSettings {
     public function __construct() {
         add_action( 'init', array($this, 'fpm_winner_post_type'));
         add_action( 'init', array( $this, 'fpm_winner_tax') );
-        add_filter( 'wp_nav_menu_args', array( $this,'fpm_main_menu') );
-        add_filter( 'wp_nav_menu_items', array( $this, 'fpm_logout_link') );
         add_action( 'plugins_loaded', array($this, 'seven_is_plugins_activated') );
         add_action( 'admin_menu', array( $this,'seven_winner_menu' ) );
-        add_shortcode( 'daily-winner', array( $this,'seven_daily_winner' ), 10, 1 );
-        add_shortcode( 'all-winners', array( $this,'seven_all_winners' )  );
-        add_shortcode( 'leader-board', array($this, 'fpm_leader_board') );
+        
+        add_filter( 'wp_nav_menu_args', array( $this,'fpm_main_menu') );
+        add_filter( 'wp_nav_menu_items', array( $this, 'fpm_logout_link') );
         add_filter( 'login_redirect', array( $this, 'seven_after_login'), 10, 3 );
         add_filter( 'wp_mail_from', array( $this,'seven_sender_email' ) );
         add_filter( 'wp_mail_from_name', array( $this,'seven_sender_name' ) );
         add_action( 'wp_head', array( $this, 'fpm_ga_code') );
         add_filter( 'manage_users_columns', array( $this,'fpm_add_user_columns' ) );
         add_filter( 'manage_users_custom_column', array( $this, 'fpm_add_user_column_data' ), 10, 3 );
+        
+        add_shortcode( 'daily-winner', array( $this,'seven_daily_winner' ), 10, 1 );
+        add_shortcode( 'all-winners', array( $this,'seven_all_winners' )  );
+        add_shortcode( 'leader-board', array($this, 'fpm_leader_board') );
     }
 
     /*Seperate Menus for logged and normal user*/
@@ -52,16 +54,17 @@ class fpmSettings {
     /**Save winner to database */
 
     public function fpm_get_points() {
-        $pool = new Football_Pool_Pool();
-
         global $current_user;
         global $wpdb;
+        
+        $pool = new Football_Pool_Pool();
 
         wp_get_current_user();
 
         $userleague = $pool->get_league_for_user( $current_user->ID );
 
         if ( ! isset( $userleague ) && ! is_integer( $userleague ) ) $userleague = FOOTBALLPOOL_LEAGUE_ALL;
+        
         $league = apply_filters( 'footballpool_rankingpage_league', Football_Pool_Utils::request_string( 'league', $userleague ) );
 
         $ranking_display = Football_Pool_Utils::get_fp_option( 'ranking_display', 0 );
@@ -126,6 +129,7 @@ class fpmSettings {
     /**Menu options */
     public function seven_winner_menu() {
         if( ! current_user_can( 'list_users' ) ) wp_die("Sorry you have no permission to access this!");
+        
         add_submenu_page('edit.php?post_type=winner_post',
          'Find Winner',
          'Find Winner',
